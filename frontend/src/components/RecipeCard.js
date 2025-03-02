@@ -1,36 +1,40 @@
 import React from "react";
 
 const RecipeCard = ({ recipe }) => {
-  if (!recipe) return null;
-
   return (
     <div style={styles.card}>
-      <img src={recipe.image} alt={recipe.title} style={styles.image} />
-      <h3 style={styles.title}>{recipe.title}</h3>
-      <p style={styles.description}>{recipe.description}</p>
+      <img src={recipe.image} alt={recipe.name} style={styles.image} />
+      <div style={styles.info}>
+        <h3 style={styles.title}>{recipe.name}</h3>
+        <p style={styles.description}>{recipe.description}</p>
+      </div>
     </div>
   );
 };
 
+// Styles
 const styles = {
   card: {
-    width: "250px",
-    background: "#fff",
+    width: "300px",
+    backgroundColor: "#fff",
     borderRadius: "10px",
-    padding: "15px",
+    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.3)", // Shadow on all sides
+    overflow: "hidden",
+    transition: "transform 0.2s",
     textAlign: "center",
-    boxShadow: "2px 2px 10px rgba(0, 0, 0, 0.1)",
   },
   image: {
     width: "100%",
-    height: "150px",
+    height: "200px",
     objectFit: "cover",
-    borderRadius: "10px",
+  },
+  info: {
+    padding: "15px",
   },
   title: {
-    fontSize: "18px",
+    fontSize: "20px",
     fontWeight: "bold",
-    margin: "10px 0",
+    marginBottom: "5px",
   },
   description: {
     fontSize: "14px",

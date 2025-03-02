@@ -14,35 +14,34 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const data = {
+    const loginData = {
       email: formData.email,
-      password: formData.password,
+      password: formData.password.toString(), // Ensure password is always a string
     };
 
+    console.log("🔹 Sending Login Data:", loginData); // Debugging
+
     try {
-      const response = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(loginData),
       });
 
-      const result = await response.json();
-      
-      if (response.ok) {
-        // Store the token in localStorage
-        localStorage.setItem('token', result.token);
-        console.log('Login successful');
-        
-        // Redirect to dashboard after successful login
-        navigate('/dashboard');
+      const data = await res.json();
+      console.log("🔍 Response Data:", data);
+
+      if (res.ok) {
+        localStorage.setItem("token", data.token);
+        navigate("/dashboard");
       } else {
-        setError(result.message); // Show error message if any
+        setError(data.message);
       }
     } catch (error) {
-      console.error('Error during login:', error);
-      setError('Login failed. Please try again.');
+      console.error("🚨 Login Error:", error);
+      setError("Something went wrong. Please try again.");
     }
   };
 
@@ -55,6 +54,7 @@ const Login = () => {
             type="email"
             name="email"
             placeholder="Email"
+            value={formData.email}
             onChange={handleChange}
             style={styles.input}
             required
@@ -63,11 +63,12 @@ const Login = () => {
             type="password"
             name="password"
             placeholder="Password"
+            value={formData.password}
             onChange={handleChange}
             style={styles.input}
             required
           />
-          {error && <p style={{ color: "red" }}>{error}</p>}
+          {error && <p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
           <button type="submit" style={styles.button}>Login</button>
         </form>
         <p style={styles.text}>
@@ -80,7 +81,7 @@ const Login = () => {
 
 const styles = {
   container: { display: "flex", justifyContent: "center", alignItems: "center", height: "100vh", background: "#f9f9f9" },
-  card: { padding: "30px", borderRadius: "10px", background: "#fff", boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)", textAlign: "center" },
+  card: { padding: "30px", borderRadius: "10px", background: "#fff", boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)", textAlign: "center", width: "350px" },
   title: { fontSize: "24px", marginBottom: "20px", fontWeight: "bold" },
   input: { width: "100%", padding: "12px", margin: "8px 0", borderRadius: "8px", border: "1px solid #ccc", fontSize: "16px" },
   button: { width: "100%", padding: "12px", borderRadius: "8px", background: "#ff7e5f", color: "#fff", fontSize: "18px", fontWeight: "bold", cursor: "pointer", border: "none", transition: "0.3s" },

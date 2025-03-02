@@ -1,8 +1,21 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { FaUpload } from "react-icons/fa";
+import API from "../axios";
+import { useNavigate } from "react-router-dom";
 
 const CreateRecipe = () => {
+  const navigate = useNavigate(); // Ensure useNavigate is inside the component
+  const token = localStorage.getItem("token");
+
+  // Redirect to login if no token
+  useEffect(() => {
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+  }, [token, navigate]);
+
   const [recipe, setRecipe] = useState({
     name: "",
     description: "",
@@ -12,106 +25,102 @@ const CreateRecipe = () => {
     youtubeUrl: "",
     category: "Breakfast",
     type: "Veg",
-    ingredients: [],
-    steps: [],
+    ingredients: [""],
+    steps: [""],
   });
 
   const handleChange = (e) => {
     setRecipe({ ...recipe, [e.target.name]: e.target.value });
   };
 
-  const handleImageUpload = (e) => {
+  const handleArrayChange = (index, value, field) => {
+    const newArray = [...recipe[field]];
+    newArray[index] = value;
+    setRecipe({ ...recipe, [field]: newArray });
+  };
+
+  const addArrayItem = (field) => {
+    setRecipe({ ...recipe, [field]: [...recipe[field], ""] });
+  };
+
+  const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setRecipe({
-        ...recipe,
-        image: file,
-        imagePreview: URL.createObjectURL(file),
-      });
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onloadend = () => {
+        setRecipe({
+          ...recipe,
+          image: file,
+          imagePreview: reader.result,
+        });
+      };
     }
-  };
-
-  const addIngredient = () => {
-    setRecipe({ ...recipe, ingredients: [...recipe.ingredients, ""] });
-  };
-
-  const addStep = () => {
-    setRecipe({ ...recipe, steps: [...recipe.steps, ""] });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let imageUrl = "";
+    console.log("Submitting Recipe:", recipe);
 
-    if (recipe.image) {
-      const formData = new FormData();
-      formData.append("file", recipe.image);
-      formData.append("upload_preset", "your_cloudinary_preset");
-      
-      try {
-        const response = await fetch("https://api.cloudinary.com/v1_1/your_cloudinary_name/image/upload", {
-          method: "POST",
-          body: formData,
-        });
-        const data = await response.json();
-        imageUrl = data.secure_url;
-      } catch (error) {
-        console.error("Image upload failed", error);
-      }
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("No token found. Please log in again.");
+      return;
     }
 
-    const newRecipe = { ...recipe, image: imageUrl };
+    const formData = new FormData();
+    formData.append("name", recipe.name);
+    formData.append("description", recipe.description);
+    formData.append("cookingTime", Number(recipe.cookingTime) || 0);
+    formData.append("category", recipe.category);
+    formData.append("type", recipe.type);
+    formData.append("youtubeUrl", recipe.youtubeUrl);
+    formData.append("ingredients", JSON.stringify(recipe.ingredients));
+    formData.append("steps", JSON.stringify(recipe.steps));
+    if (recipe.image) {
+      formData.append("image", recipe.image);
+    }
+
+    console.log("FormData being sent:", [...formData.entries()]);
 
     try {
-      const res = await fetch("https://your-api-url.com/recipes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newRecipe),
+      const response = await API.post("/recipes/create", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
       });
-      const result = await res.json();
-      console.log("Recipe saved:", result);
-      alert("Recipe created successfully!");
+
+      alert("Recipe Created Successfully!");
+      console.log(response.data);
     } catch (error) {
-      console.error("Error saving recipe", error);
+      console.error("Error creating recipe:", error.response?.data || error);
+      alert("Failed to create recipe.");
     }
   };
 
   return (
     <div className="container d-flex justify-content-center align-items-center min-vh-100 bg-light">
       <div className="col-md-8 col-lg-6 p-4 shadow rounded bg-white">
-        <h2 className="text-center mb-4 fw-bold" style={{ fontSize: "32px", textTransform: "uppercase", letterSpacing: "2px", color: "#dc3545", textShadow: "2px 2px 4px rgba(0, 0, 0, 0.2)" }}>
-          🍽️ Create Recipe
-        </h2>
-
+        <h2 className="text-center mb-4 fw-bold text-danger">🍽️ Create Recipe</h2>
         <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <input type="text" name="name" placeholder="Recipe Name" value={recipe.name} onChange={handleChange} className="form-control" />
-          </div>
-          <div className="mb-3">
-            <textarea name="description" placeholder="Recipe Description" value={recipe.description} onChange={handleChange} className="form-control"></textarea>
-          </div>
-          <div className="mb-3">
-            <input type="text" name="cookingTime" placeholder="Cooking Time (e.g., 30 mins)" value={recipe.cookingTime} onChange={handleChange} className="form-control" />
-          </div>
-
-          <div className="mb-3 text-center p-3 border rounded position-relative" style={{ borderStyle: "dashed", cursor: "pointer" }}>
+          <input type="text" name="name" placeholder="Recipe Name" value={recipe.name} onChange={handleChange} className="form-control mb-3" />
+          <textarea name="description" placeholder="Recipe Description" value={recipe.description} onChange={handleChange} className="form-control mb-3"></textarea>
+          <input type="text" name="cookingTime" placeholder="Cooking Time" value={recipe.cookingTime} onChange={handleChange} className="form-control mb-3" />
+          
+          <div className="mb-3 text-center p-3 border rounded" style={{ borderStyle: "dashed", cursor: "pointer" }}>
             <label htmlFor="imageUpload" className="form-label d-block">
               {recipe.imagePreview ? (
                 <img src={recipe.imagePreview} alt="Preview" className="img-fluid rounded" style={{ maxHeight: "120px" }} />
               ) : (
-                <div className="text-muted">
-                  <FaUpload size={24} className="mb-2" />
-                  <p>Click to Upload Image</p>
-                </div>
+                <div className="text-muted"><FaUpload size={24} className="mb-2" /><p>Click to Upload Image</p></div>
               )}
             </label>
-            <input type="file" id="imageUpload" onChange={handleImageUpload} className="form-control d-none" />
+            <input type="file" id="imageUpload" className="form-control d-none" onChange={handleImageChange} />
           </div>
-
-          <div className="mb-3">
-            <input type="text" name="youtubeUrl" placeholder="YouTube Video URL" value={recipe.youtubeUrl} onChange={handleChange} className="form-control" />
-          </div>
-
+          
+          <input type="text" name="youtubeUrl" placeholder="YouTube Video URL" value={recipe.youtubeUrl} onChange={handleChange} className="form-control mb-3" />
+          
           <div className="row mb-3">
             <div className="col">
               <select name="category" value={recipe.category} onChange={handleChange} className="form-select">
@@ -128,12 +137,19 @@ const CreateRecipe = () => {
             </div>
           </div>
 
-          <div className="d-flex justify-content-between mb-3">
-            <button type="button" onClick={addIngredient} className="btn btn-success">+ Add Ingredient</button>
-            <button type="button" onClick={addStep} className="btn btn-info">+ Add Step</button>
-          </div>
+          <h5>Ingredients</h5>
+          {recipe.ingredients.map((ingredient, index) => (
+            <input key={index} type="text" value={ingredient} onChange={(e) => handleArrayChange(index, e.target.value, "ingredients")} placeholder={`Ingredient ${index + 1}`} className="form-control mb-2" />
+          ))}
+          <button type="button" onClick={() => addArrayItem("ingredients")} className="btn btn-success mb-3">+ Add Ingredient</button>
+          
+          <h5>Steps</h5>
+          {recipe.steps.map((step, index) => (
+            <input key={index} type="text" value={step} onChange={(e) => handleArrayChange(index, e.target.value, "steps")} placeholder={`Step ${index + 1}`} className="form-control mb-2" />
+          ))}
+          <button type="button" onClick={() => addArrayItem("steps")} className="btn btn-info mb-3">+ Add Step</button>
 
-          <button type="submit" className="btn btn-danger w-100" style={{ marginTop: "40px" }}>Create Recipe</button>
+          <button type="submit" className="btn btn-danger w-100 mt-3">Create Recipe</button>
         </form>
       </div>
     </div>

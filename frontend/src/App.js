@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import Navbar from "./components/Navbar";
 import "./App.css"; // Import CSS file
+import RecipeList from "./components/RecipeList"; // Import RecipeList
 
 // Lazy Load Components
 const Home = lazy(() => import("./pages/Home"));

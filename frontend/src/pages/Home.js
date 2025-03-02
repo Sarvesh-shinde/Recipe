@@ -7,24 +7,34 @@ function Home() {
   const [type, setType] = useState("All");
   const [search, setSearch] = useState("");
 
-  const recipeSectionRef = useRef(null); // Reference for recipe section
+  const recipeSectionRef = useRef(null);
 
-  // Fetch recipes when the component loads
-  useEffect(() => {
-    fetch("https://your-api.com/recipes") // Replace with actual API URL
+  // Extract the fetchRecipes function outside of the useEffect to avoid warning
+  const fetchRecipes = () => {
+    fetch("http://localhost:5000/api/recipes")
       .then((response) => response.json())
       .then((data) => {
         console.log("Fetched Recipes:", data);
         setRecipes(data);
       })
       .catch((error) => console.error("Error fetching recipes:", error));
-  }, []);
+  };
 
-  // Scroll to recipe section when clicking "Explore Recipes"
+  useEffect(() => {
+    fetchRecipes();
+  }, []); // Empty dependency array to call fetchRecipes only once on mount
+
   const handleExploreClick = () => {
     recipeSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
-  
+
+  const filteredRecipes = recipes.filter((recipe) => {
+    return (
+      (category === "All" || recipe.category === category) &&
+      (type === "All" || recipe.type === type) &&
+      (search === "" || recipe.title.toLowerCase().includes(search.toLowerCase()))
+    );
+  });
 
   return (
     <div style={styles.container}>
@@ -40,15 +50,15 @@ function Home() {
       {/* Filters Section */}
       <div style={styles.filtersContainer}>
         <select style={styles.dropdown} value={category} onChange={(e) => setCategory(e.target.value)}>
-          <option>Category All</option>
-          <option>Breakfast</option>
-          <option>Lunch</option>
-          <option>Dinner</option>
+          <option value="All">All Categories</option>
+          <option value="Breakfast">Breakfast</option>
+          <option value="Lunch">Lunch</option>
+          <option value="Dinner">Dinner</option>
         </select>
         <select style={styles.dropdown} value={type} onChange={(e) => setType(e.target.value)}>
-          <option>Type All</option>
-          <option>Veg</option>
-          <option>Non-Veg</option>
+          <option value="All">All Types</option>
+          <option value="Veg">Veg</option>
+          <option value="Non-Veg">Non-Veg</option>
         </select>
         <input
           type="text"
@@ -61,43 +71,51 @@ function Home() {
 
       {/* Recipe List Section */}
       <div ref={recipeSectionRef} style={styles.recipeList}>
-        {recipes.length > 0 ? (
-          recipes.map((recipe) => <RecipeCard key={recipe.id} recipe={recipe} />)
+        {filteredRecipes.length > 0 ? (
+          filteredRecipes.map((recipe) => <RecipeCard key={recipe.id} recipe={recipe} />)
         ) : (
-          <p style={styles.loading}>Loading recipes...</p>
+          <p style={styles.loading}>No recipes found.</p>
         )}
       </div>
     </div>
   );
 }
 
-// Styles
+// Styles (Updated for Full Responsiveness)
 const styles = {
   container: {
     width: "100%",
     minHeight: "100vh",
-    backgroundImage: `url('/assets/your-image.jpg')`,
+    backgroundImage: `url('/assets/')`,
     backgroundSize: "cover",
     backgroundPosition: "center",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    justifyContent: "center",
-    padding: "20px",
+    marginTop: "50px",
   },
   hero: {
     textAlign: "center",
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
     background: "rgba(0, 0, 0, 0.5)",
+    backgroundImage: `url('/assets/bg.jpg')`,
     padding: "50px",
-    borderRadius: "10px",
+    borderRadius: "15px",
     color: "#fff",
     marginBottom: "20px",
+    width: "90%", // Adjust for responsiveness
+    minHeight: "390px",
   },
   filtersContainer: {
     display: "flex",
-    justifyContent: "flex-end", // Aligns filters to the right
+    flexWrap: "wrap", // Allow wrapping on smaller screens
+    justifyContent: "center",
     gap: "15px",
-    width: "80%",
+    width: "100%",
+    maxWidth: "800px",
     padding: "15px 0",
   },
   dropdown: {
@@ -106,6 +124,7 @@ const styles = {
     borderRadius: "10px",
     border: "1px solid #ccc",
     cursor: "pointer",
+    width: "150px",
   },
   search: {
     padding: "10px",
@@ -116,11 +135,11 @@ const styles = {
     outline: "none",
   },
   recipeList: {
-    display: "flex",
-    flexWrap: "wrap",
-    justifyContent: "center",
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
     gap: "20px",
-    width: "80%",
+    width: "90%",
+    maxWidth: "1200px",
     paddingTop: "20px",
   },
   loading: {
