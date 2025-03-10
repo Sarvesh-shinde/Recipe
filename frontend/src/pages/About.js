@@ -15,16 +15,16 @@ function About() {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
       >
-        About Recipe Hub
+        About to CookCanvas
       </motion.h1>
       
       <motion.p style={styles.text} whileHover={{ scale: 1.02 }}>
-        Welcome to <strong>Recipe Hub</strong> – your ultimate destination for discovering, sharing, and enjoying delicious recipes from around the world.
+        Welcome to <strong>to CookCanvas</strong> – your ultimate destination for discovering, sharing, and enjoying delicious recipes from around the world.
       </motion.p>
       
       <motion.h2 style={styles.subtitle} whileHover={{ scale: 1.1 }}>Our Mission</motion.h2>
       <p style={styles.text}>
-        At Recipe Hub, we believe that cooking is more than just preparing food – it's an experience that brings people together.
+        At to CookCanvas, we believe that cooking is more than just preparing food – it's an experience that brings people together.
       </p>
       
       <motion.ul style={styles.list}>

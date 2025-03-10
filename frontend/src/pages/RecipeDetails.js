@@ -7,7 +7,7 @@ function RecipeDetails() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`http://localhost:5000/api/recipes/${id}`)
+    fetch(`https://recipe-backend-gt7t.onrender.com/api/recipes/${id}`)
       .then((response) => response.json())
       .then((data) => {
         setRecipe(data);
