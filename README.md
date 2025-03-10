@@ -50,12 +50,12 @@ Recipe Hub is a platform where users can create an account, upload their unique 
 
 
 ## Contact
-For any inquiries, reach out at [vu1f2223083@pvppcoe.ac.in].
+For any inquiries, reach out at [vu1f2223063@pvppcoe.ac.in].
 
 
 
 
 ------------Deployed---------------
 
-frontend- https://recipe-hub-frontend.onrender.com
-backend- https://recipe-hub-backend-by5o.onrender.com
+frontend- (https://recipe-frontend-4pih.onrender.com)
+backend- (https://recipe-backend-gt7t.onrender.com)
