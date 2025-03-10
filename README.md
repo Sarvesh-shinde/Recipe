@@ -1,6 +1,6 @@
-# Recipe Hub
+# CookCanvas
 
-Recipe Hub is a platform where users can create an account, upload their unique recipes with images, and explore recipes shared by others. It offers a well-structured design with different sections for easy navigation.
+CookCanvas is a platform where users can create an account, upload their unique recipes with images, and explore recipes shared by others. It offers a well-structured design with different sections for easy navigation.
 
 ## Features
 - **User Authentication**: Secure login and signup system.
